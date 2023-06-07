@@ -44,6 +44,8 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const usersCollection = client.db("CampSnapDb").collection("users");
+        const classesCollection = client.db("CampSnapDb").collection("classes");
+
 
 
         app.post('/jwt', (req, res) => {
@@ -73,6 +75,18 @@ async function run() {
 
             const result = await usersCollection.insertOne(user);
             res.send(result);
+        });
+        // popular class related api
+        app.get('/classes', async (req, res) => {
+            const result = await classesCollection.find().toArray();
+
+            // Sort classes based on the number of students in descending order
+            const sortedClasses = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
+
+            // Limit the classes to 6
+            const limitedClasses = sortedClasses.slice(0, 6);
+
+            res.send(limitedClasses);
         });
 
 
