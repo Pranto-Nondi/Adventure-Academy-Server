@@ -85,9 +85,9 @@ async function run() {
             const sortedClasses = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
 
             // Limit the classes to 6
-            const limitedClasses = sortedClasses.slice(0, 6);
+            // const limitedClasses = sortedClasses.slice(0, 6);
 
-            res.send(limitedClasses);
+            res.send(sortedClasses);
         });
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
