@@ -77,10 +77,27 @@ async function run() {
            * 2. use verifyAdmin middleware
           */
         // users related apis
+
         app.get('/users', verifyJWT, verifyInstructor, verifyAdmin, async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         });
+        app.get('/user/:email', verifyJWT, async (req, res) => {
+            try {
+                const { email } = req.params;
+                const user = await usersCollection.findOne({ email });
+
+                if (!user) {
+                    return res.status(404).json({ error: 'User not found' });
+                }
+
+                res.json(user);
+            } catch (error) {
+                console.error('Failed to retrieve user', error);
+                res.status(500).json({ error: 'Server error' });
+            }
+        });
+
 
 
         app.post('/users', async (req, res) => {
