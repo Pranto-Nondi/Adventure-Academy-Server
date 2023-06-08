@@ -96,9 +96,9 @@ async function run() {
             const sortedInstructors = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
 
             // Limit the classes to 6
-            const limitedInstructors = sortedInstructors.slice(0, 6);
+            // const limitedInstructors = sortedInstructors.slice(0, 6);
 
-            res.send(limitedInstructors);
+            res.send(sortedInstructors);
         });
 
 
