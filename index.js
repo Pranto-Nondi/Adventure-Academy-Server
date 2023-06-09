@@ -164,8 +164,8 @@ async function run() {
 
       
         app.post('/classes', async (req, res) => {
-            const { classId, name, image, price, instructor, description } = req.body;
-            const result = await selectedClassesCollection.insertOne({ classId, name, image, price, instructor, description });
+            const { classId, name, image, price, instructor,availableSeats, description } = req.body;
+            const result = await selectedClassesCollection.insertOne({ classId, name, image, price, instructor, availableSeats,description });
             res.send({ success: true, data: result });
         });
 
