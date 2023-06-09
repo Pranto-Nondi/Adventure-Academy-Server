@@ -45,6 +45,7 @@ async function run() {
         await client.connect();
         const usersCollection = client.db("CampSnapDb").collection("users");
         const classesCollection = client.db("CampSnapDb").collection("classes");
+        const selectedClassesCollection = client.db("CampSnapDb").collection("selectedClasses");
         const instructorsCollection = client.db("CampSnapDb").collection("instructors");
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -82,7 +83,7 @@ async function run() {
             const result = await usersCollection.find().toArray();
             res.send(result);
         });
-        
+
 
 
         app.post('/users', async (req, res) => {
@@ -160,6 +161,26 @@ async function run() {
 
             res.send(sortedClasses);
         });
+
+      
+        app.post('/classes', async (req, res) => {
+            const { classId, name, image, price, instructor, description } = req.body;
+            const result = await selectedClassesCollection.insertOne({ classId, name, image, price, instructor, description });
+            res.send({ success: true, data: result });
+        });
+
+        app.get('/disabledButtons', async (req, res) => {
+            const disabledButtons = await selectedClassesCollection.find().toArray();
+            res.send(disabledButtons);
+        });
+
+        app.post('/disabledButtons', async (req, res) => {
+            const { _id } = req.body;
+            const result = await selectedClassesCollection.insertOne({ _id });
+            res.send({ success: true, data: result });
+        });
+
+
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
 
