@@ -150,6 +150,15 @@ async function run() {
 
 
         // popular classes and instructors related api
+
+        app.post('/class', verifyJWT,verifyInstructor, async (req, res) => {
+            const newItem = req.body;
+            const result = await classesCollection.insertOne(newItem)
+            res.send(result);
+        })
+
+
+
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
 
@@ -162,23 +171,50 @@ async function run() {
             res.send(sortedClasses);
         });
 
-      
+
+
         app.post('/classes', async (req, res) => {
-            const { classId, name, image, price, instructor,availableSeats, description } = req.body;
-            const result = await selectedClassesCollection.insertOne({ classId, name, image, price, instructor, availableSeats,description });
+            const { classId, name, image, price, instructor, availableSeats, description, email } = req.body;
+            const result = await selectedClassesCollection.insertOne({
+                classId,
+                name,
+                image,
+                price,
+                instructor,
+                availableSeats,
+                description,
+                email,
+            });
             res.send({ success: true, data: result });
         });
 
+        // GET /disabledButtons
         app.get('/disabledButtons', async (req, res) => {
-            const disabledButtons = await selectedClassesCollection.find().toArray();
+            const { email } = req.query;
+            const disabledButtons = await selectedClassesCollection.find({ email }).toArray();
             res.send(disabledButtons);
         });
 
+        // POST /disabledButtons
         app.post('/disabledButtons', async (req, res) => {
-            const { _id } = req.body;
-            const result = await selectedClassesCollection.insertOne({ _id });
+            const { classId, email } = req.body;
+            const result = await selectedClassesCollection.insertOne({ classId, email });
             res.send({ success: true, data: result });
         });
+
+        // GET /userClasses
+        app.get('/userClasses', async (req, res) => {
+            const { email } = req.query;
+            if (!email) {
+                res.send([]);
+            } else {
+                const userClasses = await selectedClassesCollection.find({ email }).toArray();
+                res.send(userClasses);
+            }
+        });
+
+
+
 
 
         app.get('/instructors', async (req, res) => {
