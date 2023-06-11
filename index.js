@@ -48,6 +48,7 @@ async function run() {
         const selectedClassesCollection = client.db("CampSnapDb").collection("selectedClasses");
         const instructorsCollection = client.db("CampSnapDb").collection("instructors");
         const disabledButtonsCollection = client.db("CampSnapDb").collection("disabled-buttons");
+        const manageClassesCollection = client.db("CampSnapDb").collection("manageClasses");
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
@@ -132,14 +133,14 @@ async function run() {
 
         })
 
-       
-        
+
+
         app.patch('/users/:id/admin', async (req, res) => {
             const id = req.params.id;
 
             try {
                 const result = await usersCollection.updateOne(
-                    { _id: new  ObjectId(id) },
+                    { _id: new ObjectId(id) },
                     { $set: { role: 'admin' } }
                 );
 
@@ -175,6 +176,48 @@ async function run() {
         });
 
 
+        // manage classes api
+
+
+        app.post('/api/classes/approve/:id', async (req, res) => {
+            try {
+                const classId = req.params.id;
+              
+                const result = await classesCollection.updateOne(
+                    { _id: new ObjectId(classId) },
+                    { $set: { status: 'approved' } }
+                );
+
+                if (result.modifiedCount > 0) {
+                    res.json({ success: true });
+                } else {
+                    res.json({ success: false });
+                }
+            } catch (error) {
+                console.error('Failed to approve class:', error);
+                res.status(500).json({ success: false, error: 'Internal server error' });
+            }
+        });
+
+        // POST /api/classes/deny/:id
+        app.post('/api/classes/deny/:id', async (req, res) => {
+            try {
+                const classId = req.params.id;
+               
+                const result = await classesCollection.updateOne(
+                    { _id: new ObjectId(classId) },
+                    { $set: { status: 'denied' } }
+                );
+                if (result.modifiedCount > 0) {
+                    res.json({ success: true });
+                } else {
+                    res.json({ success: false });
+                }
+            } catch (error) {
+                console.error('Failed to deny class:', error);
+                res.status(500).json({ success: false, error: 'Internal server error' });
+            }
+        });
 
 
 
@@ -218,30 +261,30 @@ async function run() {
             res.send({ success: true, data: result });
         });
 
-        // GET /disabledButtons
-        app.get('/disabledButtons', async (req, res) => {
-            const { email } = req.query;
-            const disabledButtons = await selectedClassesCollection.find({ email }).toArray();
-            res.send(disabledButtons);
-        });
+        // // GET /disabledButtons
+        // app.get('/disabledButtons', async (req, res) => {
+        //     const { email } = req.query;
+        //     const disabledButtons = await selectedClassesCollection.find({ email }).toArray();
+        //     res.send(disabledButtons);
+        // });
 
-        // POST /disabledButtons
-        app.post('/disabledButtons', async (req, res) => {
-            const { classId, email } = req.body;
-            const result = await selectedClassesCollection.insertOne({ classId, email });
-            res.send({ success: true, data: result });
-        });
+        // // POST /disabledButtons
+        // app.post('/disabledButtons', async (req, res) => {
+        //     const { classId, email } = req.body;
+        //     const result = await selectedClassesCollection.insertOne({ classId, email });
+        //     res.send({ success: true, data: result });
+        // });
 
         // GET /userClasses
-        app.get('/userClasses', async (req, res) => {
-            const { email } = req.query;
-            if (!email) {
-                res.send([]);
-            } else {
-                const userClasses = await selectedClassesCollection.find({ email }).toArray();
-                res.send(userClasses);
-            }
-        });
+        // app.get('/userClasses', async (req, res) => {
+        //     const { email } = req.query;
+        //     if (!email) {
+        //         res.send([]);
+        //     } else {
+        //         const userClasses = await selectedClassesCollection.find({ email }).toArray();
+        //         res.send(userClasses);
+        //     }
+        // });
 
 
 
