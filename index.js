@@ -47,6 +47,7 @@ async function run() {
         const classesCollection = client.db("CampSnapDb").collection("classes");
         const selectedClassesCollection = client.db("CampSnapDb").collection("selectedClasses");
         const instructorsCollection = client.db("CampSnapDb").collection("instructors");
+        const disabledButtonsCollection = client.db("CampSnapDb").collection("disabled-buttons");
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
@@ -79,7 +80,7 @@ async function run() {
           */
         // users related apis
 
-        app.get('/users', verifyJWT, verifyInstructor, verifyAdmin, async (req, res) => {
+        app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         });
@@ -131,27 +132,56 @@ async function run() {
 
         })
 
-        // app.patch('/users/admin/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     console.log(id);
-        //     const filter = { _id: new ObjectId(id) };
-        //     const updateDoc = {
-        //         $set: {
-        //             role: 'admin'
-        //         },
-        //     };
+       
+        
+        app.patch('/users/:id/admin', async (req, res) => {
+            const id = req.params.id;
 
-        //     const result = await usersCollection.updateOne(filter, updateDoc);
-        //     res.send(result);
+            try {
+                const result = await usersCollection.updateOne(
+                    { _id: new  ObjectId(id) },
+                    { $set: { role: 'admin' } }
+                );
 
-        // })
+                if (result.modifiedCount > 0) {
+                    res.send({ success: true });
+                } else {
+                    res.send({ success: false });
+                }
+            } catch (error) {
+                console.error('Error making user admin:', error);
+                res.send({ success: false });
+            }
+        });
+
+        app.patch('/users/:id/instructor', async (req, res) => {
+            const id = req.params.id;
+
+            try {
+                const result = await usersCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: { role: 'instructor' } }
+                );
+
+                if (result.modifiedCount > 0) {
+                    res.send({ success: true });
+                } else {
+                    res.send({ success: false });
+                }
+            } catch (error) {
+                console.error('Error making user instructor:', error);
+                res.send({ success: false });
+            }
+        });
+
+
 
 
 
 
         // popular classes and instructors related api
 
-        app.post('/class', verifyJWT,verifyInstructor, async (req, res) => {
+        app.post('/class', verifyJWT, verifyInstructor, async (req, res) => {
             const newItem = req.body;
             const result = await classesCollection.insertOne(newItem)
             res.send(result);
