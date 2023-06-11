@@ -248,7 +248,7 @@ async function run() {
             const { classId, className, imgURL, price, instructorName, availableSeats, instructorEmail, status, email } = req.body;
 
             try {
-               
+
                 const existingSelection = await selectedClassesCollection.findOne({ classId, email });
 
                 if (existingSelection) {
@@ -266,11 +266,11 @@ async function run() {
             }
         });
 
-        app.get('/selectedClasses', async (req, res) => {
+        app.get('/selectedClasses', verifyJWT, async (req, res) => {
             const { email } = req.query;
 
             try {
-               
+
                 const selectedClasses = await selectedClassesCollection.find({ email }).toArray();
 
                 return res.send({ success: true, data: selectedClasses });
@@ -279,6 +279,12 @@ async function run() {
                 return res.status(500).send({ success: false, message: 'Failed to fetch selected classes.' });
             }
         });
+        app.delete('/selectedClasses/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await selectedClassesCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
 
