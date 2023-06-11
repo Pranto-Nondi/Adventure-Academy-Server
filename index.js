@@ -231,7 +231,6 @@ async function run() {
         })
 
 
-
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
 
@@ -245,44 +244,45 @@ async function run() {
         });
 
 
-
         app.post('/selectClasses', async (req, res) => {
-            const { classId,
-                className,
-                imgURL,
-                price,
-                instructorName,
-                availableSeats,
-                instructorEmail,
-                status,
-                email } = req.body;
-            const result = await selectedClassesCollection.insertOne({
-                classId,
-                className,
-                imgURL,
-                price,
-                instructorName,
-                availableSeats,
-                instructorEmail,
-                status,
-                email
-            });
-            res.send({ success: true, data: result });
+            const { classId, className, imgURL, price, instructorName, availableSeats, instructorEmail, status, email } = req.body;
+
+            try {
+               
+                const existingSelection = await selectedClassesCollection.findOne({ classId, email });
+
+                if (existingSelection) {
+                    return res.send({ success: false, message: 'Class already selected by the user.' });
+                }
+
+                const result = await selectedClassesCollection.insertOne({
+                    classId, className, imgURL, price, instructorName, availableSeats, instructorEmail, status, email
+                });
+
+                return res.send({ success: true, data: result });
+            } catch (error) {
+                console.error('Error occurred while selecting a class:', error);
+                return res.status(500).send({ success: false, message: 'Failed to select a class.' });
+            }
         });
 
-        // GET /disabledButtons
-        // app.get('/disabledButtons', async (req, res) => {
-        //     const { email } = req.query;
-        //     const disabledButtons = await selectedClassesCollection.find({ email }).toArray();
-        //     res.send(disabledButtons);
-        // });
+        app.get('/selectedClasses', async (req, res) => {
+            const { email } = req.query;
 
-        // // POST /disabledButtons
-        // app.post('/disabledButtons', async (req, res) => {
-        //     const { classId, email } = req.body;
-        //     const result = await selectedClassesCollection.insertOne({ classId, email });
-        //     res.send({ success: true, data: result });
-        // });
+            try {
+               
+                const selectedClasses = await selectedClassesCollection.find({ email }).toArray();
+
+                return res.send({ success: true, data: selectedClasses });
+            } catch (error) {
+                console.error('Error occurred while fetching selected classes:', error);
+                return res.status(500).send({ success: false, message: 'Failed to fetch selected classes.' });
+            }
+        });
+
+
+
+
 
         // GET /userClasses
         app.get('/userClasses', async (req, res) => {
