@@ -182,7 +182,7 @@ async function run() {
         app.post('/api/classes/approve/:id', async (req, res) => {
             try {
                 const classId = req.params.id;
-              
+
                 const result = await classesCollection.updateOne(
                     { _id: new ObjectId(classId) },
                     { $set: { status: 'approved' } }
@@ -203,7 +203,7 @@ async function run() {
         app.post('/api/classes/deny/:id', async (req, res) => {
             try {
                 const classId = req.params.id;
-               
+
                 const result = await classesCollection.updateOne(
                     { _id: new ObjectId(classId) },
                     { $set: { status: 'denied' } }
@@ -246,22 +246,31 @@ async function run() {
 
 
 
-        app.post('/classes', async (req, res) => {
-            const { classId, name, image, price, instructor, availableSeats, description, email } = req.body;
+        app.post('/selectClasses', async (req, res) => {
+            const { classId,
+                className,
+                imgURL,
+                price,
+                instructorName,
+                availableSeats,
+                instructorEmail,
+                status,
+                email } = req.body;
             const result = await selectedClassesCollection.insertOne({
                 classId,
-                name,
-                image,
+                className,
+                imgURL,
                 price,
-                instructor,
+                instructorName,
                 availableSeats,
-                description,
-                email,
+                instructorEmail,
+                status,
+                email
             });
             res.send({ success: true, data: result });
         });
 
-        // // GET /disabledButtons
+        // GET /disabledButtons
         // app.get('/disabledButtons', async (req, res) => {
         //     const { email } = req.query;
         //     const disabledButtons = await selectedClassesCollection.find({ email }).toArray();
@@ -276,15 +285,15 @@ async function run() {
         // });
 
         // GET /userClasses
-        // app.get('/userClasses', async (req, res) => {
-        //     const { email } = req.query;
-        //     if (!email) {
-        //         res.send([]);
-        //     } else {
-        //         const userClasses = await selectedClassesCollection.find({ email }).toArray();
-        //         res.send(userClasses);
-        //     }
-        // });
+        app.get('/userClasses', async (req, res) => {
+            const { email } = req.query;
+            if (!email) {
+                res.send([]);
+            } else {
+                const userClasses = await selectedClassesCollection.find({ email }).toArray();
+                res.send(userClasses);
+            }
+        });
 
 
 
