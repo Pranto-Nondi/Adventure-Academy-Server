@@ -288,9 +288,10 @@ async function run() {
             res.send(result);
         })
         app.get('/selectedClasses/:id', async (req, res) => {
-            const id = req.params.id;
-            try {
 
+            try {
+                const id = req.params.id;
+                console.log(id)
                 const query = { _id: new ObjectId(id) };
                 const selectClass = await selectedClassesCollection.findOne(query);
                 res.send(selectClass);
