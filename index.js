@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -11,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 const verifyJWT = (req, res, next) => {
     const authorization = req.headers.authorization;
+    console.log({ authorization })
     if (!authorization) {
         return res.status(401).send({ error: true, message: 'unauthorized access' });
     }
@@ -49,6 +50,7 @@ async function run() {
         const instructorsCollection = client.db("CampSnapDb").collection("instructors");
         const disabledButtonsCollection = client.db("CampSnapDb").collection("disabled-buttons");
         const manageClassesCollection = client.db("CampSnapDb").collection("manageClasses");
+        const paymentCollection = client.db("CampSnapDb").collection("payments");
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
@@ -285,6 +287,18 @@ async function run() {
             const result = await selectedClassesCollection.deleteOne(query);
             res.send(result);
         })
+        app.get('/selectedClasses/:id', async (req, res) => {
+            const id = req.params.id;
+            try {
+
+                const query = { _id: new ObjectId(id) };
+                const selectClass = await selectedClassesCollection.findOne(query);
+                res.send(selectClass);
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
 
 
 
@@ -317,7 +331,36 @@ async function run() {
             res.send(sortedInstructors);
         });
 
+        // create payment intent
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
 
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+
+        // payment related api
+        app.post('/payments/:id', verifyJWT, async (req, res) => {
+            try {
+                const id = req.params.id;
+                const payment = req.body;
+                const insertResult = await paymentCollection.insertOne(payment);
+                const query = { _id: new ObjectId(id) };
+                const deleteResult = await selectedClassesCollection.deleteOne(query);
+                res.send({ insertResult, deleteResult });
+            } catch (error) {
+                console.log('Error saving payment information:', error);
+                res.status(500).send('Error saving payment information');
+            }
+        })
 
 
 
