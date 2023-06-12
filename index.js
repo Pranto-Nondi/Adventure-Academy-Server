@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 const verifyJWT = (req, res, next) => {
     const authorization = req.headers.authorization;
-    console.log({ authorization })
+
     if (!authorization) {
         return res.status(401).send({ error: true, message: 'unauthorized access' });
     }
@@ -245,7 +245,28 @@ async function run() {
             res.send(sortedClasses);
         });
 
+        app.put('/classes/:classId', async (req, res) => {
+            const classId = req.params.classId;
 
+            try {
+                const updatedClass = await classesCollection.findOneAndUpdate(
+                    { _id: new ObjectId(classId) },
+                    { $inc: { availableSeats: -1 } },
+                    { new: true }
+                );
+
+                if (updatedClass) {
+                    res.json(updatedClass);
+                } else {
+                    res.status(404).json({ error: 'Class not found' });
+                }
+            } catch (error) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+
+
+        //selected Classes
         app.post('/selectClasses', async (req, res) => {
             const { classId, className, imgURL, price, instructorName, availableSeats, instructorEmail, status, email } = req.body;
 
@@ -320,6 +341,7 @@ async function run() {
 
 
 
+
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
 
@@ -362,7 +384,22 @@ async function run() {
                 res.status(500).send('Error saving payment information');
             }
         })
+        // payment history
+        app.get('/api/payment/history', async (req, res) => {
+            const userEmail = req.query.email;
 
+            try {
+
+                const result = await paymentCollection
+                    .find({ email: userEmail })
+                    .sort({ date: -1 }) // Sorting in descending order
+                    .toArray();
+                res.json(result);
+            } catch (error) {
+                console.error('Error retrieving payment history:', error);
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
 
 
 
