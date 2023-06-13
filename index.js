@@ -26,10 +26,9 @@ const verifyJWT = (req, res, next) => {
         next();
     })
 }
-// SummerCampSnap
-// I0DQl6yxUo5WBute
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://SummerCampSnap:I0DQl6yxUo5WBute@cluster0.1eww0o2.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.1eww0o2.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -37,13 +36,21 @@ const client = new MongoClient(uri, {
         version: ServerApiVersion.v1,
         strict: true,
         deprecationErrors: true,
-    }
+    },
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    maxPoolSize: 10,
 });
 
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        client.connect((err) => {
+            if (err) {
+                console.log(err)
+                return err
+            }
+        });
         const usersCollection = client.db("CampSnapDb").collection("users");
         const classesCollection = client.db("CampSnapDb").collection("classes");
         const selectedClassesCollection = client.db("CampSnapDb").collection("selectedClasses");
@@ -220,8 +227,6 @@ async function run() {
                 res.status(500).json({ success: false, error: 'Internal server error' });
             }
         });
-
-
 
 
 
@@ -459,15 +464,3 @@ app.listen(port, () => {
 })
 
 
-/**
- * --------------------------------
- *      NAMING CONVENTION
- * --------------------------------
- * users : userCollection
- * app.get('/users')
- * app.get('/users/:id')
- * app.post('/users')
- * app.patch('/users/:id')
- * app.put('/users/:id')
- * app.delete('/users/:id')
-*/
