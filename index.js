@@ -353,7 +353,23 @@ async function run() {
 
             res.send(sortedInstructors);
         });
+        app.post('/instructors', async (req, res) => {
+            try {
+                const existingInstructor = await instructorsCollection.findOne({ instructorEmail: req.body.instructorEmail });
+                if (existingInstructor) {
+                    return res.status(400).json({ error: 'Instructor with the provided email already exists' });
+                }
 
+                const result = await instructorsCollection.insertOne(req.body);
+                if (result.insertedId) {
+                    res.json({ insertedId: result.insertedId });
+                } else {
+                    throw new Error('Error inserting instructor');
+                }
+            } catch (err) {
+                res.status(500).json({ error: err.message });
+            }
+        });
         // create payment intent
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const { price } = req.body;
