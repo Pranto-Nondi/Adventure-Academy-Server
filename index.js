@@ -224,6 +224,7 @@ async function run() {
 
 
 
+
         // popular classes and instructors related api
 
         app.post('/class', verifyJWT, verifyInstructor, async (req, res) => {
@@ -264,6 +265,25 @@ async function run() {
                 res.status(500).json({ error: 'Internal server error' });
             }
         });
+
+        app.patch('/class/:id', async (req, res) => {
+            try {
+                const classId = req.params.id;
+                const updatedClass = req.body;
+
+                const result = await classesCollection.updateOne({ _id: new ObjectId(classId) }, { $set: updatedClass });
+
+                if (result.modifiedCount === 1) {
+                    res.json({ updated: true });
+                } else {
+                    res.status(404).json({ error: 'Class not found' });
+                }
+            } catch (error) {
+                res.status(500).json({ error: 'Error updating class' });
+            }
+        });
+
+
 
 
         //selected Classes
