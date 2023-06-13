@@ -275,7 +275,7 @@ async function run() {
                 const existingSelection = await selectedClassesCollection.findOne({ classId, email });
 
                 if (existingSelection) {
-                    return res.send({ success: false, message: 'Class already selected by the user.' });
+                    return res.send({ success: false, message: 'Class already selected .' });
                 }
 
                 const result = await selectedClassesCollection.insertOne({
