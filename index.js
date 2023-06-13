@@ -83,11 +83,7 @@ async function run() {
             }
             next();
         }
-        /**
-           * 0. do not show secure links to those who should not see the links
-           * 1. use jwt token: verifyJWT
-           * 2. use verifyAdmin middleware
-          */
+       
         // users related apis
 
         app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
@@ -243,12 +239,12 @@ async function run() {
             const result = await classesCollection.find().toArray();
 
             // Sort classes based on the number of students in descending order
-            const sortedClasses = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
+            // const sortedClasses = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
 
             // Limit the classes to 6
             // const limitedClasses = sortedClasses.slice(0, 6);
 
-            res.send(sortedClasses);
+            res.send(result);
         });
 
         app.put('/classes/:classId', async (req, res) => {
@@ -369,14 +365,14 @@ async function run() {
 
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
-
+            console.log('unsort',{result})
             // Sort classes based on the number of students in descending order
-            const sortedInstructors = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
+            // const sortedInstructors = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
 
             // Limit the classes to 6
             // const limitedInstructors = sortedInstructors.slice(0, 6);
-
-            res.send(sortedInstructors);
+           
+            res.send(result);
         });
         app.post('/instructors', async (req, res) => {
             try {
