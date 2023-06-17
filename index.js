@@ -287,7 +287,7 @@ async function run() {
 
 
 
-        //selected Classes
+        //selected Classes.
         app.post('/selectClasses', async (req, res) => {
             const { classId, className, imgURL, price, instructorName, availableSeats, instructorEmail, status, email } = req.body;
 
