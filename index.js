@@ -83,7 +83,7 @@ async function run() {
             }
             next();
         }
-       
+
         // users related apis
 
         app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
@@ -224,6 +224,30 @@ async function run() {
             }
         });
 
+        // POST /api/classes/feedback/:id
+        app.post('/api/classes/feedback/:id', async (req, res) => {
+            try {
+                const classId = req.params.id;
+                console.log(classId)
+                const feedback = req.body.feedback; 
+                // Assuming the feedback is sent in the request body
+                console.log(feedback)
+
+                const result = await classesCollection.updateOne(
+                    { _id: new ObjectId(classId) },
+                    { $set: { feedback } }
+                );
+
+                if (result.modifiedCount > 0) {
+                    res.json({ success: true });
+                } else {
+                    res.json({ success: false });
+                }
+            } catch (error) {
+                console.error('Failed to save feedback:', error);
+                res.status(500).json({ success: false, error: 'Internal server error' });
+            }
+        });
 
 
         // popular classes and instructors related api
@@ -365,13 +389,13 @@ async function run() {
 
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
-            console.log('unsort',{result})
+            console.log('unsort', { result })
             // Sort classes based on the number of students in descending order
             // const sortedInstructors = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
 
             // Limit the classes to 6
             // const limitedInstructors = sortedInstructors.slice(0, 6);
-           
+
             res.send(result);
         });
         app.post('/instructors', async (req, res) => {
