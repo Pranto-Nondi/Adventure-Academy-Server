@@ -229,7 +229,7 @@ async function run() {
             try {
                 const classId = req.params.id;
                 console.log(classId)
-                const feedback = req.body.feedback; 
+                const feedback = req.body.feedback;
                 // Assuming the feedback is sent in the request body
                 console.log(feedback)
 
@@ -277,7 +277,7 @@ async function run() {
             try {
                 const updatedClass = await classesCollection.findOneAndUpdate(
                     { _id: new ObjectId(classId) },
-                    { $inc: { availableSeats: -1 } },
+                    { $inc: { availableSeats: -1, enrolledStudents: +1 } },
                     { new: true }
                 );
 
@@ -290,6 +290,16 @@ async function run() {
                 res.status(500).json({ error: 'Internal server error' });
             }
         });
+
+
+
+
+
+
+
+
+
+
 
         app.patch('/class/:id', async (req, res) => {
             try {
