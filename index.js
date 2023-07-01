@@ -291,16 +291,6 @@ async function run() {
             }
         });
 
-
-
-
-
-
-
-
-
-
-
         app.patch('/class/:id', async (req, res) => {
             try {
                 const classId = req.params.id;
