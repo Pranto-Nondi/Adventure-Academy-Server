@@ -262,11 +262,7 @@ async function run() {
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
 
-            // Sort classes based on the number of students in descending order
-            // const sortedClasses = result.sort((a, b) => b.numberOfStudents - a.numberOfStudents);
-
-            // Limit the classes to 6
-            // const limitedClasses = sortedClasses.slice(0, 6);
+           
 
             res.send(result);
         });
